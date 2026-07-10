@@ -1,0 +1,570 @@
+openapi: 3.0.3
+info:
+  title: REST VTEX
+  version: 1.5.0
+  contact:
+    name: Suporte TI
+    email: suporteti@comercialqueiroz.com.br
+servers:
+  # - url: http://nlb-api-vtex-cb7de35b584c8507.elb.us-east-2.amazonaws.com/rest
+  #   description: Produção
+  - url: https://wkrtswcddl.execute-api.us-east-2.amazonaws.com/vtex/rest
+    description: Produção
+paths:
+  /api/oauth2/v1/token:
+    post:
+      tags:
+        - Auth
+      summary: Autenticação
+      operationId: auth
+      description: "A autenticação deve ser feita e o token gerado deve estar presente em todas as requisições."
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RequestToken'
+      responses:
+        '200':
+          description: Token gerado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          description: Erro nos parâmetros
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorToken'
+  /vtex/creditLimit/{document}:
+    get:
+      tags:
+        - Cliente
+      parameters:
+        - in: path
+          name: document
+          required: true
+          schema:
+            type: string
+            example: "00000000000"
+          allowReserved: true
+      summary: Limite de crédito
+      operationId: creditLimit
+      description: Consulta informações de crédito do cliente com base no CPF/CNPJ
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditLimit'
+        '204':
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                  message: "Cliente não encontrado"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Bad Body:
+                  value:
+                    message: "Body não informado"
+                Bad Document:
+                  value:
+                    message: "Documento inválido"
+  /vtex/creditReserve:
+    post:
+      tags:
+        - Reserva
+      summary: Reserva de crédito
+      description: Realiza a reserva de crédito do valor informado
+      operationId: createCreditReserve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditReserveRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditReserve'
+              examples:
+                Reserva Criada:
+                  value:
+                    cardId: '04791601'
+                    id: '000001'
+                    refUrl: /rest
+                    status: 'pending'
+                Reserva Já Existente:
+                  value:
+                    message: '  Pedido já possui uma reserva'
+                    id: '000001'
+                    status: 'pending|authorized|confirmed|canceled'
+        '204':
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: 'Cliente não encontrado'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Body:
+                  value:
+                    message: 'Body não informado'
+                Cliente:
+                  value:
+                    message: 'ID do cliente inválido'
+                Erro Reserva:
+                  value:
+                    message: 'Ocorreu um erro na geração da reserva'
+                Reserva Zerada:
+                  value:
+                    message: 'Valor para reserva zerado'
+                Saldo Insuficiente:
+                  value:
+                    message: 'Saldo insuficiente para realizar a reserva'
+                    balance: 0
+                    value: 5000
+  /vtex/authorization/{customerId}/reserve/{id}:
+    get:
+      tags:
+        - Reserva
+      summary: Consulta autorização
+      description: Consulta status da transação
+      operationId: transactionAuthorization
+      parameters:
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+            example: '04791601'
+          allowReserved: true
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: '000131'
+          allowReserved: true
+      responses:
+        '200':
+          description: Reserva Rejeitada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reserve'
+              example:
+                  message: "Transação rejeitada"
+                  status: "rejected"
+        '202':
+          description: Reserva Autorizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reserve'
+              examples:
+                Success:
+                  value:
+                    oid: '000001'
+                    value: 5000
+                    date: '1900-07-07T12:00:00Z'
+                    status: 'authorized'
+        '204':
+          description: No Content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Cliente:
+                  value:
+                    message: Cliente não encontrado
+                Reserva:
+                  value:
+                    message: Reserva não encontrada
+                Pedido:
+                  value:
+                    message: Pedido nao encontrado
+        '206':
+          description: Reserva Pendente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reserve'
+              examples:
+                Success:
+                  value:
+                    oid: null
+                    value: 0
+                    date: null
+                    status: 'pending'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Body:
+                  value:
+                    message: Body não informado
+                Id inválido:
+                  value:
+                    message: ID da transação inválida
+                Id Cliente inválido:
+                  value:
+                    message: ID do cliente inválido
+                Reserva:
+                  value:
+                    message: Reserva nao atualizada
+  /vtex/cancellation/{customerId}/reserve/{id}:
+    post:
+      tags:
+        - Reserva
+      summary: Cancela transação
+      description: Realiza o cancelamento da transação e estorna o valor.
+      operationId: cancelTransaction
+      parameters:
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+            example: '04791601'
+          allowReserved: true
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: '86000131'
+          allowReserved: true
+      responses:
+        '200':
+          description: Reserva Cancelada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reserve'
+              examples:
+                Success:
+                  value:
+                    oid: '000001'
+                    value: 5000
+                    date: '1900-07-07T12:00:00Z'
+                    status: 'canceled'
+        '204':
+          description: No Content
+          content: 
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/Error'
+              examples:
+                Cliente:
+                  value:
+                    message: Cliente não encontrado.
+                Reserva:
+                  value:
+                    message: Reserva não encontrada.
+                Transação:
+                  value:
+                    message: Transação não encontrada.
+        '400':
+          description: Bad Request
+          content: 
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/Error'
+              examples:
+                Body:
+                  value:
+                    message: Body não informado.
+                Id Inválido:
+                  value:
+                    message: ID da transação inválida.
+                Id Cliente:
+                  value:
+                    message: ID do cliente inválido.
+  /vtex/confirmation/{customerId}/reserve/{id}:
+    post:
+      tags: 
+        - Reserva
+      summary: Confirma transação
+      description: Realiza a confirmação da transação
+      operationId: confirmTransaction
+      parameters:
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+            example: '04791601'
+          allowReserved: true
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: '86000131'
+          allowReserved: true
+      responses:
+        '202':
+          description: Reserva Autorizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reserve'
+              examples:
+                Success:
+                  value:
+                    oid: '000001'
+                    value: 5000
+                    date: '1900-07-07T12:00:00Z'
+                    status: 'confirmed'
+        '204':
+          description: No Content
+          content:
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Cliente:
+                  value:
+                    message: Cliente não encontrado
+                Reserva:
+                  value:
+                    message: Reserva não encontrada
+                Transação:
+                  value:
+                    message: Transação não encontrada
+        '400':
+          description: Bad Request
+          content:
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                Body:
+                  value:
+                    message: Body não informado
+                Id Inválido:
+                  value:
+                    message: ID da transação inválida
+                Id Cliente:
+                  value:
+                    message: ID do cliente inválido
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: Insira sua chave de API de integração.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Insira o token de integração.
+  schemas:
+    CreditReserveRequest:
+      type: object
+      required:
+        - id
+        - value
+        - orderId
+      properties:
+        id:
+          type: string
+          description: "Identificador do cliente."
+          example: '04791601'
+        value:
+          type: number
+          format: double
+          description: "Valor da reserva em centavos."
+          example: 50000
+        operation:
+          type: string
+          description: "Tipo da operação financeira."
+          example: Credit/Debit
+        orderId:
+          type: string
+          description: "Identificador do pedido."
+          example: '1643890500037-01'
+        sequence:
+          type: integer
+          description: "Sequência da operação."
+          example: 1
+    RequestToken:
+      type: object
+      required:
+        - username
+        - password
+        - grant_type
+      properties:
+        username:
+          type: string
+          example: 'admin'
+        password:
+          type: string
+          example: '123456'
+        grant_type:
+          type: string
+          example: 'password'
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+        refresh_token:
+          type: string
+          example: 'DFMoDHc5QnRzijJ2pQCdiIjX.JWkZVF8AFC1...'
+        scope:
+          type: string
+          example: 'default'
+        token_type:
+          type: string
+          example: 'Bearer'
+        expires_in:
+          type: integer
+          example: 3600
+        hasMFA:
+          type: boolean
+          example: false
+    CreditLimit:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "Identificador único do limite de crédito do cliente."
+          example: '04791601'
+        balance:
+          type: number
+          description: "Saldo disponível atual para utilização."
+          example: 1000000
+        emissionDate:
+          type: string
+          description: "Data de emissão do limite (ISO 8601: '2024-01-01T00:00.000Z')."
+          example: 1900-07-07T12:00:00Z
+        expiringDate:
+          type: string
+          description: "Data de expiração ou validade do limite concedido (ISO 8601: '2027-01-31T00:00.000Z')."
+          example: 1900-07-07T12:00:00Z
+        provider:
+          type: string
+          description: "Nome do provedor responsável pelo crédito."
+          example: Klark Kent
+        totalBalance:
+          type: number
+          description: "Valor total do limite originalmente concedido."
+          example: 1000000
+        caption:
+          type: string
+          description: "Texto exibido ao consumidor no checkout."
+          example: Boleto Bancário
+    CreditReserve:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "ID único da reserva."
+          example: '000001'
+        cardId:
+          type: string
+          description: "ID único do cliente."
+          example: '04791601'
+        refUrl:
+          type: string
+          description: "URL de referência da transação."
+          example: "/rest/vtex/creditReserve"
+        status:
+          type: string
+          description: "Status da transação"
+          example: "peding"
+        message:
+          type: string
+          example: "string"
+    Reserve:
+      type: object
+      properties:
+        oid:
+          type: string
+          nullable: true
+          description: "ID único da reserva."
+          example: '000001'
+        value:
+          type: number
+          description: "Valor em centávos."
+          example: 5000
+        date:
+          type: string
+          nullable: true
+          description: "Data/hora (ISO 8601)."
+          example: '1900-07-07T12:00:00Z'
+        status:
+          type: string
+          description: "Status da transação."
+          example: "pending"
+          enum:
+            - pending
+            - authorized
+            - confirmed
+            - canceled
+            - rejected
+        message:
+          type: string
+          example: "string"
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Documento inválido
+        balance:
+          type: integer
+          example: 5000
+        value:
+          type: integer
+          example: 5000
+    ErrorToken:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 401
+        message:
+          type: string
+          example: "string"
+        detailedMessage:
+          type: string
+          example: "string"
+security:
+  - bearerAuth: []
+    ApiKeyAuth: []
+tags:
+  - name: Auth
+    description: Operações de autenticação e geração de token
+  - name: Cliente
+    description: Consultas relacionadas ao cliente e limite de crédito
+  - name: Reserva
+    description: Operações de reserva, autorização, confirmação e cancelamento
