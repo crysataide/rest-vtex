@@ -29,7 +29,7 @@ A API disponibiliza os recursos necessários para controlar o fluxo de crédito 
 ```mermaid
 flowchart LR
     A[Autenticação] --> B[Sincronização de cliente PJ]
-    B --> C[Consulta de limite]
+    A[Autenticação] --> C[Consulta de limite]
     C --> D[Criação da reserva]
     D --> E{Análise da reserva}
 
