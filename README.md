@@ -49,6 +49,7 @@ flowchart LR
 |---|---|---|
 | `POST` | `/api/oauth2/v1/token` | Gera o token de autenticação da integração. |
 | `GET` | `/vtex/creditLimit/{document}` | Consulta o limite e o saldo disponível do cliente pelo CPF ou CNPJ. |
+| `PATCH` | `/vtex/customer` | Cria ou atualiza o cadastro de um cliente pessoa jurídica no ERP. Também utilizado para solicitar uma análise de crédito para o cliente. |
 | `POST` | `/vtex/creditReserve` | Realiza a reserva de um valor no limite de crédito. |
 | `GET` | `/vtex/authorization/{customerId}/reserve/{id}` | Consulta o status da autorização de uma reserva. |
 | `POST` | `/vtex/confirmation/{customerId}/reserve/{id}` | Confirma uma transação previamente autorizada. |
