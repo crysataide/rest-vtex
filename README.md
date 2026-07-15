@@ -28,14 +28,17 @@ A API disponibiliza os recursos necessários para controlar o fluxo de crédito 
 
 ```mermaid
 flowchart LR
-    A[Autenticação] --> B[Consulta de limite]
-    B --> C[Criação da reserva]
-    C --> D{Análise da reserva}
-    D -->|Autorizada| E[Confirmação]
-    D -->|Pendente| F[Nova consulta]
-    D -->|Rejeitada| G[Fim do fluxo]
-    E --> H[Transação concluída]
-    C -->|Cancelamento| I[Estorno da reserva]
+    A[Autenticação] --> B[Sincronização de cliente PJ]
+    B --> C[Consulta de limite]
+    C --> D[Criação da reserva]
+    D --> E{Análise da reserva}
+
+    E -->|Autorizada| F[Confirmação]
+    E -->|Pendente| G[Nova consulta]
+    E -->|Rejeitada| H[Fim do fluxo]
+
+    F --> I[Transação concluída]
+    D -->|Cancelamento| J[Estorno da reserva]
 ```
 
 ---

@@ -80,6 +80,46 @@ paths:
                 Bad Document:
                   value:
                     message: "Documento inválido"
+  /vtex/customer:
+    patch:
+      tags:
+        - Cliente
+      summary: Sincroniza cliente
+      description: Cria ou atualiza o cadastro de um cliente pessoa jurídica no ERP. Quando `requestedAnalysis` for igual a `true`, também será solicitada uma análise de crédito para o cliente.
+      operationId: syncCustomer
+      requestBody:
+        required: true
+        description: Dados cadastrais e comerciais do cliente pessoa jurídica.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '200':
+          description: Cliente sincronizado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          description: Requisição inválida ou dados insuficientes para sincronização.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                bodyNaoInformado:
+                  summary: Corpo da requisição não informado
+                  value:
+                    message: "Body não informado"
+                dadosDoClienteInvalidos:
+                  summary: Falha na sincronização cadastral
+                  value:
+                    message: "Erro na sincronização dos dados do cliente"
+                analiseDeCreditoInvalida:
+                  summary: Falha na solicitação da análise de crédito
+                  value:
+                    message: "Erro na sincronização da análise de crédito"
   /vtex/creditReserve:
     post:
       tags:
@@ -456,32 +496,146 @@ components:
       properties:
         id:
           type: string
-          description: "Identificador único do limite de crédito do cliente."
+          description: "Identificador único do limite de crédito do cliente"
           example: '04791601'
         balance:
           type: number
-          description: "Saldo disponível atual para utilização."
+          description: "Saldo disponível atual para utilização"
           example: 1000000
         emissionDate:
           type: string
-          description: "Data de emissão do limite (ISO 8601: '2024-01-01T00:00.000Z')."
+          description: "Data de emissão do limite (ISO 8601: '2024-01-01T00:00.000Z')"
           example: 1900-07-07T12:00:00Z
         expiringDate:
           type: string
-          description: "Data de expiração ou validade do limite concedido (ISO 8601: '2027-01-31T00:00.000Z')."
+          description: "Data de expiração ou validade do limite concedido (ISO 8601: '2027-01-31T00:00.000Z')"
           example: 1900-07-07T12:00:00Z
         provider:
           type: string
-          description: "Nome do provedor responsável pelo crédito."
+          description: "Nome do provedor responsável pelo crédito"
           example: Klark Kent
         totalBalance:
           type: number
-          description: "Valor total do limite originalmente concedido."
+          description: "Valor total do limite originalmente concedido"
           example: 1000000
         caption:
           type: string
-          description: "Texto exibido ao consumidor no checkout."
+          description: "Texto exibido ao consumidor no checkout"
           example: Boleto Bancário
+    Customer:
+      type: object
+      required:
+        - customerId
+        - corporateName
+        - tradeName
+        - email
+        - document
+        - stateRegistration
+        - homePhone
+        - requestedAnalysis
+        - address
+      properties:
+        customerId:
+          type: string
+          format: uuid
+          description: Identificador único do cliente na VTEX.
+          example: "12f26a2d-e9eb-4e76-8ec3-400444be7bc5"
+        corporateName:
+          type: string
+          description: Razão social do cliente.
+          example: COMUNICACAO LTDA
+        tradeName:
+          type: string
+          description: Nome fantasia do cliente.
+          example: COMUNI MAIS
+        email:
+          type: string
+          description: Endereço de e-mail corporativo do cliente.
+          example: comunimais@corporate.com
+        document:
+          type: string
+          description: CNPJ do cliente, com ou sem formatação.
+          example: "99.999.999/9999-99"
+        stateRegistration:
+          type: string
+          description: Inscrição estadual do cliente
+          example: 99.999.999-9
+        homePhone:
+          type: string
+          description: Número de telefone principal do cliente, incluindo o DDD.
+          example: "11999999999"
+        requestedAnalysis:
+          type: boolean
+          description: Indica se deve ser solicitada uma análise de crédito após a sincronização cadastral.
+          example: true
+        address:
+          $ref: "#/components/schemas/CustomerAddress"
+    CustomerAddress:
+      type: object
+      description: "Informações de endereço do cliente"
+      required:
+        - postalCode
+        - state
+        - city
+        - neighborhood
+        - street
+        - number
+      properties:
+        postalCode:
+          type: string
+          description: CEP do endereço, com ou sem formatação.
+          example: "03310-000"
+        state:
+          type: string
+          minLength: 2
+          maxLength: 2
+          description: Sigla da unidade federativa.
+          example: SP
+        city:
+          type: string
+          description: Município do endereço.
+          example: "São Paulo"
+        neighborhood:
+          type: string
+          description: Bairro do endereço.
+          example: "Tatuapé"
+        street:
+          type: string
+          description: Logradouro do endereço.
+          example: "R. do Tatuapé"
+        number:
+          type: string
+          description: Número do imóvel.
+          example: "999"
+        complement:
+          type: string
+          description: "Complemento do endereço"
+          example: "Sala 10"
+        reference:
+          type: string
+          description: "Ponto de referência do endereço"
+          example: "Próximo ao shopping"
+    CustomerResponse:
+      type: object
+      required:
+        - id
+        - balance
+        - totalBalance
+      properties:
+        id:
+          type: string
+          description: Código do cliente gerado ou localizado no ERP.
+          example: '00000101'
+        balance:
+          type: integer
+          format: int64
+          description: Crédito disponível para utilização, expresso em centavos.
+          example: 1000000
+        totalBalance:
+          type: integer
+          format: int64
+          description: Limite total de crédito aprovado para o cliente, expresso em centavos.
+          example: 1000000
     CreditReserve:
       type: object
       properties:
