@@ -1,15 +1,21 @@
 openapi: 3.0.3
 info:
   title: REST VTEX
-  version: 1.7.0
+  version: 2.0.0
+  description: Documentação da API responsável pela integração de operações de crédito e clientes entre o ERP TOTVS Protheus e o E-Commerce VTEX.
+  # summary: Integração de operações de crédito e clientes
   contact:
     name: Suporte TI
     email: suporteti@comercialqueiroz.com.br
+  x-logo:
+    url: 'https://github.com/crysataide/rest-vtex/blob/main/rest-vtex-logo.png'
+    # backgroundColor: '#FFFFFF'
+    altText: 'REST VTEX logo'
 servers:
-  # - url: http://nlb-api-vtex-cb7de35b584c8507.elb.us-east-2.amazonaws.com/rest
-  #   description: Produção
   - url: https://wkrtswcddl.execute-api.us-east-2.amazonaws.com/vtex/rest
     description: Produção
+  - url: https://htztymyfp1.execute-api.us-east-2.amazonaws.com/hom/rest
+    description: Homologação
 paths:
   /api/oauth2/v1/token:
     post:
@@ -429,31 +435,35 @@ components:
     CreditReserveRequest:
       type: object
       required:
-        - id
-        - value
+        - customerId
+        - paymentCondition
         - orderId
+        - value
+        - requestId
       properties:
-        id:
+        customerId:
           type: string
-          description: "Identificador do cliente."
-          example: '04791601'
+          description: "Identificador único do cliente"
+          example: "04791601"
+        paymentCondition:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: "Identificador único da condição de pagamento escolhida"
+          example: "011"
+        orderId:
+          type: string
+          description: "Identificador do pedido"
+          example: '1643890500037-01'
         value:
           type: number
           format: double
-          description: "Valor da reserva em centavos."
+          description: "Valor da reserva em centavos"
           example: 50000
-        operation:
+        requestId:
           type: string
-          description: "Tipo da operação financeira."
-          example: Credit/Debit
-        orderId:
-          type: string
-          description: "Identificador do pedido."
-          example: '1643890500037-01'
-        sequence:
-          type: integer
-          description: "Sequência da operação."
-          example: 1
+          description: "Identificador da requisição"
+          example: "50E828C435434B1D8A7CA8AB93AFF39F"
     RequestToken:
       type: object
       required:
@@ -493,35 +503,29 @@ components:
           example: false
     CreditLimit:
       type: object
+      required:
+        - customerId
+        - availableBalance
+        - creditLimit
       properties:
-        id:
+        customerId:
           type: string
-          description: "Identificador único do limite de crédito do cliente"
+          description: Identificador único do cliente
           example: '04791601'
-        balance:
+        availableBalance:
           type: number
           description: "Saldo disponível atual para utilização"
           example: 1000000
-        emissionDate:
-          type: string
-          description: "Data de emissão do limite (ISO 8601: '2024-01-01T00:00.000Z')"
-          example: 1900-07-07T12:00:00Z
-        expiringDate:
-          type: string
-          description: "Data de expiração ou validade do limite concedido (ISO 8601: '2027-01-31T00:00.000Z')"
-          example: 1900-07-07T12:00:00Z
-        provider:
-          type: string
-          description: "Nome do provedor responsável pelo crédito"
-          example: Klark Kent
-        totalBalance:
+        creditLimit:
           type: number
           description: "Valor total do limite originalmente concedido"
           example: 1000000
-        caption:
-          type: string
-          description: "Texto exibido ao consumidor no checkout"
-          example: Boleto Bancário
+        paymentConditions:
+          type: array
+          description: "Informações das condições de pagamento do cliente"
+          items:
+            - $ref: "#/components/schemas/CustomerConditions1"
+            - $ref: "#/components/schemas/CustomerConditions2"
     Customer:
       type: object
       required:
@@ -615,6 +619,52 @@ components:
           type: string
           description: "Ponto de referência do endereço"
           example: "Próximo ao shopping"
+    CustomerConditions1:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identificador único da condição de pagamento
+          example: "010"
+        caption:
+          type: string
+          description: "Texto exibido ao consumidor no checkout"
+          example: Crédito Queiroz 07 Dias
+        amount:
+          type: number
+          description: Percentual de acréscimo que a condição de pagamento aplica
+          example: 0
+        installment:
+          type: integer
+          description: Quantidade de parcelas que a condição de pagamento aplica
+          example: 1
+        active:
+          type: boolean
+          description: Indica se a condição está disponível
+          example: true
+    CustomerConditions2:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Identificador único da condição de pagamento
+          example: "011"
+        caption:
+          type: string
+          description: "Texto exibido ao consumidor no checkout"
+          example: Crédito Queiroz 07/14 Dias
+        amount:
+          type: number
+          description: Percentual de acréscimo que a condição de pagamento aplica
+          example: 0.70
+        installment:
+          type: integer
+          description: Quantidade de parcelas que a condição de pagamento aplica
+          example: 2
+        active:
+          type: boolean
+          description: Indica se a condição está disponível
+          example: true
     CustomerResponse:
       type: object
       required:
