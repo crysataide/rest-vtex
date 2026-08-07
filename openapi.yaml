@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: REST VTEX
-  version: 2.0.0
+  version: 2.0.5
   description: Documentação da API responsável pela integração de operações de crédito e clientes entre o ERP TOTVS Protheus e o E-Commerce VTEX.
   # summary: Integração de operações de crédito e clientes
   contact:
@@ -14,35 +14,9 @@ info:
 servers:
   - url: https://wkrtswcddl.execute-api.us-east-2.amazonaws.com/vtex/rest
     description: Produção
-  - url: https://htztymyfp1.execute-api.us-east-2.amazonaws.com/hom/rest
-    description: Homologação
+  # - url: https://htztymyfp1.execute-api.us-east-2.amazonaws.com/hom/rest
+  #   description: Homologação
 paths:
-  /api/oauth2/v1/token:
-    post:
-      tags:
-        - Auth
-      summary: Autenticação
-      operationId: auth
-      description: "A autenticação deve ser feita e o token gerado deve estar presente em todas as requisições."
-      requestBody:
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/RequestToken'
-      responses:
-        '200':
-          description: Token gerado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Token'
-        '400':
-          description: Erro nos parâmetros
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorToken'
   /vtex/creditLimit/{document}:
     get:
       tags:
@@ -64,7 +38,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreditLimit'
+                $ref: '#/components/schemas/CreditLimitResponse'
         '204':
           description: No Content
           content:
@@ -80,12 +54,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               examples:
-                Bad Body:
-                  value:
-                    message: "Body não informado"
-                Bad Document:
-                  value:
-                    message: "Documento inválido"
+                noParameter:
+                  $ref: '#/components/schemas/BadRequest-noParameter'
+                noBody:
+                  $ref: '#/components/schemas/BadRequest-noBody'
+                noProperty:
+                  $ref: '#/components/schemas/BadRequest-noProperty'
   /vtex/customer:
     patch:
       tags:
@@ -99,7 +73,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Customer'
+              $ref: '#/components/schemas/CustomerRequest'
       responses:
         '200':
           description: Cliente sincronizado com sucesso.
@@ -114,10 +88,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               examples:
-                bodyNaoInformado:
-                  summary: Corpo da requisição não informado
-                  value:
-                    message: "Body não informado"
+                noBody:
+                  $ref: '#/components/schemas/BadRequest-noBody'
+                noProperty:
+                  $ref: '#/components/schemas/BadRequest-noProperty'
                 dadosDoClienteInvalidos:
                   summary: Falha na sincronização cadastral
                   value:
@@ -145,7 +119,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreditReserve'
+                $ref: '#/components/schemas/CreditReserveResponse'
               examples:
                 Reserva Criada:
                   value:
@@ -173,19 +147,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               examples:
-                Body:
-                  value:
-                    message: 'Body não informado'
-                Cliente:
-                  value:
-                    message: 'ID do cliente inválido'
-                Erro Reserva:
+                noBody:
+                  $ref: '#/components/schemas/BadRequest-noBody'
+                noProperty:
+                  $ref: '#/components/schemas/BadRequest-noProperty'
+                erroReserve:
+                  summary: Erro na reserva
                   value:
                     message: 'Ocorreu um erro na geração da reserva'
-                Reserva Zerada:
+                reserveEmpty:
+                  summary: Reserva zerada
                   value:
                     message: 'Valor para reserva zerado'
-                Saldo Insuficiente:
+                insufficientBalance:
+                  summary: Saldo insuficiente
                   value:
                     message: 'Saldo insuficiente para realizar a reserva'
                     balance: 0
@@ -271,16 +246,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               examples:
-                Body:
-                  value:
-                    message: Body não informado
-                Id inválido:
-                  value:
-                    message: ID da transação inválida
-                Id Cliente inválido:
-                  value:
-                    message: ID do cliente inválido
-                Reserva:
+                noParameter:
+                  $ref: '#/components/schemas/BadRequest-noParameter'
+                noBody:
+                  $ref: '#/components/schemas/BadRequest-noBody'
+                noProperty:
+                  $ref: '#/components/schemas/BadRequest-noProperty'
+                reserveInvalid:
+                  summary: Erro na reserva
                   value:
                     message: Reserva nao atualizada
   /vtex/cancellation/{customerId}/reserve/{id}:
@@ -342,15 +315,12 @@ paths:
               schema: 
                 $ref: '#/components/schemas/Error'
               examples:
-                Body:
-                  value:
-                    message: Body não informado.
-                Id Inválido:
-                  value:
-                    message: ID da transação inválida.
-                Id Cliente:
-                  value:
-                    message: ID do cliente inválido.
+                noParameter:
+                  $ref: '#/components/schemas/BadRequest-noParameter'
+                noBody:
+                  $ref: '#/components/schemas/BadRequest-noBody'
+                noProperty:
+                  $ref: '#/components/schemas/BadRequest-noProperty'
   /vtex/confirmation/{customerId}/reserve/{id}:
     post:
       tags: 
@@ -410,27 +380,59 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               examples:
-                Body:
-                  value:
-                    message: Body não informado
-                Id Inválido:
-                  value:
-                    message: ID da transação inválida
-                Id Cliente:
-                  value:
-                    message: ID do cliente inválido
+                noParameter:
+                  $ref: '#/components/schemas/BadRequest-noParameter'
+                noBody:
+                  $ref: '#/components/schemas/BadRequest-noBody'
+                noProperty:
+                  $ref: '#/components/schemas/BadRequest-noProperty'
+  /vtex/order/interest-rate:
+    post:
+      tags: 
+        - Pedido
+      summary: Consulta juros
+      description: Consulta juros da condição de pagamento escolhida pelo cliente e retorna os items com o acréscimo rateado
+      operationId: interestRate
+      requestBody:
+        required: true
+        description: "`requestBody` retirado da documentação oficial da VTEX - [Tax Services](https://developers.vtex.com/docs/guides/tax-services-specification#update-orderform)"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterestRateRequest'
+      responses:
+        '200':
+          description: Resposta da solicitação enviada pelo Checkout
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InterestRateResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                noBody:
+                  $ref: '#/components/schemas/BadRequest-noBody'
+                noProperty:
+                  $ref: '#/components/schemas/BadRequest-noProperty'
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: x-api-key
-      description: Insira sua chave de API de integração.
-    bearerAuth:
+    basicAuth:
       type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: Insira o token de integração.
+      scheme: basic
+      description: |
+        O valor do header **Authorization** deve ser composto por:
+
+        `Basic Base64(<usuário>:<senha>)`
+
+        Exemplo:
+
+        `Authorization: Basic dXN1YXJpbzpzZW5oYQ==`
   schemas:
     CreditReserveRequest:
       type: object
@@ -464,44 +466,7 @@ components:
           type: string
           description: "Identificador da requisição"
           example: "50E828C435434B1D8A7CA8AB93AFF39F"
-    RequestToken:
-      type: object
-      required:
-        - username
-        - password
-        - grant_type
-      properties:
-        username:
-          type: string
-          example: 'admin'
-        password:
-          type: string
-          example: '123456'
-        grant_type:
-          type: string
-          example: 'password'
-    Token:
-      type: object
-      properties:
-        access_token:
-          type: string
-          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-        refresh_token:
-          type: string
-          example: 'DFMoDHc5QnRzijJ2pQCdiIjX.JWkZVF8AFC1...'
-        scope:
-          type: string
-          example: 'default'
-        token_type:
-          type: string
-          example: 'Bearer'
-        expires_in:
-          type: integer
-          example: 3600
-        hasMFA:
-          type: boolean
-          example: false
-    CreditLimit:
+    CreditLimitResponse:
       type: object
       required:
         - customerId
@@ -526,7 +491,7 @@ components:
           items:
             - $ref: "#/components/schemas/CustomerConditions1"
             - $ref: "#/components/schemas/CustomerConditions2"
-    Customer:
+    CustomerRequest:
       type: object
       required:
         - customerId
@@ -686,7 +651,7 @@ components:
           format: int64
           description: Limite total de crédito aprovado para o cliente, expresso em centavos.
           example: 1000000
-    CreditReserve:
+    CreditReserveResponse:
       type: object
       properties:
         id:
@@ -708,6 +673,279 @@ components:
         message:
           type: string
           example: "string"
+    InterestRateRequest:
+      type: object
+      description: Body enviado pela VTEX pelo Checkout API
+      properties:
+        orderFormId:
+          type: string
+          description: Identificador único do formulário do pedido
+          example: "e5098ad8c4jk490bb2f6f03400ac1413"
+        salesChannel:
+          type: string
+          description: Identificador único do canal de vendas
+          example: "1"
+        items:
+          type: array
+          description: |
+            Lista de objetos que representam os produtos do pedido, onde `dockId` é um campo que
+            se refere à identificação no sistema de logística que contém informações sobre o endereço
+          items:
+            $ref: "#/components/schemas/InterestrateRequest-items"
+        totals:
+          type: array
+          description: Valor total do orderForm, detalhado em impostos, frete, descontos e preços dos itens
+          items:
+            - allOf:
+                - $ref: "#/components/schemas/InterestrateRequest-totals"
+              example:
+                id: Items
+                name: Items Total
+                value: 820
+            - allOf:
+                - $ref: "#/components/schemas/InterestrateRequest-totals"
+              example:
+                id: Discounts
+                name: Discounts Total
+                value: 0
+            - allOf:
+                - $ref: "#/components/schemas/InterestrateRequest-totals"
+              example:
+                id: Shipping
+                name: Shipping Total
+                value: 0
+            - allOf:
+                - $ref: "#/components/schemas/InterestrateRequest-totals"
+              example:
+                id: "tax"
+                name: "tax"
+                value: 0
+        clientEmail:
+          type: string
+          description: Endereço de email do cliente
+          example: client@email.com
+        shippingDestinations:
+          type: array
+          description: Lista de informações de envio
+          items:
+            - allOf:
+                - $ref: "#/components/schemas/InterestrateRequest-shippingDestinations"
+              example:
+                id: 1
+                country: BRA
+                state: RJ
+                city: Rio de Janeiro
+                neighborhood: Botafogo
+                postalCode: 22250-905
+                street: Praia Botafogo
+            - allOf:
+                - $ref: "#/components/schemas/InterestrateRequest-shippingDestinations"
+              example:
+                id: 2
+                country: BRA
+                state: SP
+                city: São Paulo
+                neighborhood: Moema
+                postalCode: 04514-000
+                street: Rua Tuim
+        clientData:
+          $ref: "#/components/schemas/InterestrateRequest-clientData"
+        paymentData:
+          type: object
+          description: Lista de pagamentos, com informações referentes ao pagamento do pedido
+          properties:
+            payments:
+              type: array
+              items:
+                $ref: "#/components/schemas/InterestrateRequest-paymentData"
+        taxApp:
+          $ref: "#/components/schemas/InterestrateRequest-taxApp"
+    InterestrateRequest-items:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "0"
+        sku:
+          type: string
+          example: "26"
+        productId:
+          type: string
+          example: "12"
+        ean:
+          type: string
+          example: "12345678909123"
+        refId:
+          type: string
+          example: "3432"
+        categoryId:
+          type: string
+          example: "3"
+        unitMultiplier:
+          type: integer
+          example: 1
+        measurementUnit:
+          type: string
+          example: "un"
+        targetPrice:
+          type: number
+          example: 8.2
+        itemPrice:
+          type: number
+          example: 8.2
+        quantity:
+          type: integer
+          example: 1
+        discountPrice:
+          type: number
+          example: 0
+        dockId:
+          type: string
+          example: "1125a08"
+        freightPrice:
+          type: number
+          example: 0
+        brandId:
+          type: string
+          example: "2000002"
+        taxCode:
+          type: string
+          example: "PC040210"
+        sellerId:
+          type: string
+          example: "1"
+        shippingDestinationId:
+          type: integer
+          example: 1
+    InterestrateRequest-totals:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        value:
+          type: number
+    InterestrateRequest-shippingDestinations:
+      type: object
+      properties:
+        id:
+          type: integer
+        country:
+          type: string
+        state:
+          type: string
+        city:
+          type: string
+        neighborhood:
+          type: string
+        postalCode:
+          type: string
+        street:
+          type: string
+    InterestrateRequest-clientData:
+      type: object
+      description: Informações sobre o cliente que fez o pedido
+      properties:
+        email:
+          type: string
+          example: client@email.com
+        document:
+          type: string
+          example: "12345678909"
+        documentType:
+          type: string
+          example: cpf
+        clientProfileData:
+          type: string
+          example: "12345678000100"
+        stateInscription:
+          type: string
+          example: 12345678"
+    InterestrateRequest-paymentData:
+      type: object
+      properties:
+        paymentSystem:
+          type: string
+          example: "2"
+        bin:
+          type: string
+          nullable: true
+          example: null
+        referenceValue:
+          type: number
+          example: 820
+        value:
+          type: number
+          example: 820
+        installments:
+          type: integer
+          nullable: true
+          example: null
+    InterestrateRequest-taxApp:
+      type: object
+      description: Objeto com campos personalizados específicos para a aplicação fiscal
+      properties:
+        fields:
+          type: object
+          properties:
+            isTradeIn:
+              type: string
+              example: Yes
+            productuid:
+              type: string
+              example: "15216842581"
+            quoteuid:
+              type: string
+              example: "29882961591"
+            condition:
+              type: string
+              example: working
+            tradeInPrice:
+              type: string
+              example: "220.00"
+            title:
+              type: string
+              example: ROG Phone II 512GB
+            productIdApplied:
+              type: string
+              example: "404"
+            uid:
+              type: string
+              example: "29882961591"
+            taxBase:
+              type: string
+              example: "1399.99"
+        id:
+          type: string
+          example: tradeincart
+        major:
+          type: integer
+          example: 1
+    InterestRateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: índice do SKU no array de itens enviado pelo corpo da requisição
+          example: "1"
+        taxes:
+          type: array
+          items:
+            type: object
+            properties: 
+              name:
+                type: string
+                description: Nome do imposto que aparecerá no checkout
+                example: Juros da condicao escolhida
+              description:
+                type: string
+                description: Campo informativo, que não aparece no storefront
+                example: "Juros aplicados ao item de acordo com a condicao de pagamento selecionada."
+              value:
+                type: number
+                description: Valor numérico absoluto que será adicionado ao preço original
+                example: 0.19
     Reserve:
       type: object
       properties:
@@ -750,25 +988,24 @@ components:
         value:
           type: integer
           example: 5000
-    ErrorToken:
-      type: object
-      properties:
-        code:
-          type: integer
-          example: 401
-        message:
-          type: string
-          example: "string"
-        detailedMessage:
-          type: string
-          example: "string"
+    BadRequest-noParameter:
+      summary: Parâmetro não informado na URL
+      value:
+        message: Parâmetro não informado
+    BadRequest-noBody:
+      summary: Corpo da requisição não informado
+      value:
+        message: Body não informado
+    BadRequest-noProperty:
+      summary: Propriedade obrigatória não informada
+      value:
+        message: Propriedade '{property}' não informada
 security:
-  - bearerAuth: []
-    ApiKeyAuth: []
+  - basicAuth: []
 tags:
-  - name: Auth
-    description: Operações de autenticação e geração de token
   - name: Cliente
     description: Consultas relacionadas ao cliente e limite de crédito
   - name: Reserva
     description: Operações de reserva, autorização, confirmação e cancelamento
+  - name: Pedido
+    description: Operações para consulta de juros
