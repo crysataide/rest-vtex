@@ -858,27 +858,37 @@ components:
       properties:
         id:
           type: string
+          example: string
         name:
           type: string
+          example: string
         value:
           type: number
+          example: 0.0
     InterestrateRequest-shippingDestinations:
       type: object
       properties:
         id:
           type: integer
+          example: 0
         country:
           type: string
+          example: string
         state:
           type: string
+          example: string
         city:
           type: string
+          example: string
         neighborhood:
           type: string
+          example: string
         postalCode:
           type: string
+          example: string
         street:
           type: string
+          example: string
     InterestrateRequest-clientData:
       type: object
       description: Informações sobre o cliente que fez o pedido
