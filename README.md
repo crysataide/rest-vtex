@@ -1,4 +1,4 @@
-# REST VTEX (2.0.0) — Documentação da API de Crédito
+# REST VTEX (2.5.0) — Documentação da API de Crédito
 
 [![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0.3-6BA539?logo=openapiinitiative&logoColor=white)](https://www.openapis.org/)
 [![Redocly](https://img.shields.io/badge/Redocly-API%20Documentation-EF496F)](https://redocly.com/)
