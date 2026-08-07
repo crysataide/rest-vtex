@@ -55,11 +55,17 @@ paths:
                 $ref: '#/components/schemas/Error'
               examples:
                 noParameter:
-                  $ref: '#/components/schemas/BadRequest-noParameter'
+                  summary: Parâmetro não informado na URL
+                  value:
+                    message: Parâmetro não informado
                 noBody:
-                  $ref: '#/components/schemas/BadRequest-noBody'
+                  summary: Corpo da requisição não informado
+                  value:
+                    message: Body não informado
                 noProperty:
-                  $ref: '#/components/schemas/BadRequest-noProperty'
+                  summary: Propriedade obrigatória não informada
+                  value:
+                    message: Propriedade '{property}' não informada
   /vtex/customer:
     patch:
       tags:
@@ -89,9 +95,13 @@ paths:
                 $ref: '#/components/schemas/Error'
               examples:
                 noBody:
-                  $ref: '#/components/schemas/BadRequest-noBody'
+                  summary: Corpo da requisição não informado
+                  value:
+                    message: Body não informado
                 noProperty:
-                  $ref: '#/components/schemas/BadRequest-noProperty'
+                  summary: Propriedade obrigatória não informada
+                  value:
+                    message: Propriedade '{property}' não informada
                 dadosDoClienteInvalidos:
                   summary: Falha na sincronização cadastral
                   value:
@@ -148,9 +158,13 @@ paths:
                 $ref: '#/components/schemas/Error'
               examples:
                 noBody:
-                  $ref: '#/components/schemas/BadRequest-noBody'
+                  summary: Corpo da requisição não informado
+                  value:
+                    message: Body não informado
                 noProperty:
-                  $ref: '#/components/schemas/BadRequest-noProperty'
+                  summary: Propriedade obrigatória não informada
+                  value:
+                    message: Propriedade '{property}' não informada
                 erroReserve:
                   summary: Erro na reserva
                   value:
@@ -247,11 +261,17 @@ paths:
                 $ref: '#/components/schemas/Error'
               examples:
                 noParameter:
-                  $ref: '#/components/schemas/BadRequest-noParameter'
+                  summary: Parâmetro não informado na URL
+                  value:
+                    message: Parâmetro não informado
                 noBody:
-                  $ref: '#/components/schemas/BadRequest-noBody'
+                  summary: Corpo da requisição não informado
+                  value:
+                    message: Body não informado
                 noProperty:
-                  $ref: '#/components/schemas/BadRequest-noProperty'
+                  summary: Propriedade obrigatória não informada
+                  value:
+                    message: Propriedade '{property}' não informada
                 reserveInvalid:
                   summary: Erro na reserva
                   value:
@@ -316,11 +336,17 @@ paths:
                 $ref: '#/components/schemas/Error'
               examples:
                 noParameter:
-                  $ref: '#/components/schemas/BadRequest-noParameter'
+                  summary: Parâmetro não informado na URL
+                  value:
+                    message: Parâmetro não informado
                 noBody:
-                  $ref: '#/components/schemas/BadRequest-noBody'
+                  summary: Corpo da requisição não informado
+                  value:
+                    message: Body não informado
                 noProperty:
-                  $ref: '#/components/schemas/BadRequest-noProperty'
+                  summary: Propriedade obrigatória não informada
+                  value:
+                    message: Propriedade '{property}' não informada
   /vtex/confirmation/{customerId}/reserve/{id}:
     post:
       tags: 
@@ -381,11 +407,17 @@ paths:
                 $ref: '#/components/schemas/Error'
               examples:
                 noParameter:
-                  $ref: '#/components/schemas/BadRequest-noParameter'
+                  summary: Parâmetro não informado na URL
+                  value:
+                    message: Parâmetro não informado
                 noBody:
-                  $ref: '#/components/schemas/BadRequest-noBody'
+                  summary: Corpo da requisição não informado
+                  value:
+                    message: Body não informado
                 noProperty:
-                  $ref: '#/components/schemas/BadRequest-noProperty'
+                  summary: Propriedade obrigatória não informada
+                  value:
+                    message: Propriedade '{property}' não informada
   /vtex/order/interest-rate:
     post:
       tags: 
@@ -417,9 +449,13 @@ paths:
                 $ref: '#/components/schemas/Error'
               examples:
                 noBody:
-                  $ref: '#/components/schemas/BadRequest-noBody'
+                  summary: Corpo da requisição não informado
+                  value:
+                    message: Body não informado
                 noProperty:
-                  $ref: '#/components/schemas/BadRequest-noProperty'
+                  summary: Propriedade obrigatória não informada
+                  value:
+                    message: Propriedade '{property}' não informada
 components:
   securitySchemes:
     basicAuth:
@@ -988,18 +1024,6 @@ components:
         value:
           type: integer
           example: 5000
-    BadRequest-noParameter:
-      summary: Parâmetro não informado na URL
-      value:
-        message: Parâmetro não informado
-    BadRequest-noBody:
-      summary: Corpo da requisição não informado
-      value:
-        message: Body não informado
-    BadRequest-noProperty:
-      summary: Propriedade obrigatória não informada
-      value:
-        message: Propriedade '{property}' não informada
 security:
   - basicAuth: []
 tags:

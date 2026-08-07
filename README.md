@@ -30,15 +30,16 @@ A API disponibiliza os recursos necessários para controlar o fluxo de crédito 
 flowchart LR
     A[Autenticação] --> B[Sincronização de cliente PJ]
     A[Autenticação] --> C[Consulta de limite]
-    C --> D[Criação da reserva]
-    D --> E{Análise da reserva}
+    A[Autenticação] --> D[Consulta juros]
+    C --> E[Criação da reserva]
+    E --> F{Análise da reserva}
 
-    E -->|Autorizada| F[Confirmação]
-    E -->|Pendente| G[Nova consulta]
-    E -->|Rejeitada| H[Fim do fluxo]
+    F -->|Autorizada| G[Confirmação]
+    F -->|Pendente| H[Nova consulta]
+    F -->|Rejeitada| I[Fim do fluxo]
 
-    F --> I[Transação concluída]
-    D -->|Cancelamento| J[Estorno da reserva]
+    G --> J[Transação concluída]
+    E -->|Cancelamento| K[Estorno da reserva]
 ```
 
 ---
