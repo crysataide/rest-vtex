@@ -8,7 +8,7 @@ info:
     name: Suporte TI
     email: suporteti@comercialqueiroz.com.br
   x-logo:
-    url: 'https://github.com/crysataide/rest-vtex/blob/main/rest-vtex-logo.png'
+    url: '/assets/rest-vtex-logo.png'
     # backgroundColor: '#FFFFFF'
     altText: 'REST VTEX logo'
 servers:
